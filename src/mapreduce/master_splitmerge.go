@@ -16,6 +16,7 @@ func (mr *Master) merge() {
 	kvs := make(map[string]string)
 	for i := 0; i < mr.nReduce; i++ {
 		p := mergeName(mr.jobName, i)
+		//fmt.Printf("the fileName in merge is %s\n", p)
 		fmt.Printf("Merge: read %s\n", p)
 		file, err := os.Open(p)
 		if err != nil {
@@ -37,7 +38,7 @@ func (mr *Master) merge() {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-
+	//fmt.Printf("the create fileName in merge is %s\n", "mrtmp." + mr.jobName)
 	file, err := os.Create("mrtmp." + mr.jobName)
 	if err != nil {
 		log.Fatal("Merge: create ", err)

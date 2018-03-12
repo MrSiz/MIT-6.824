@@ -51,6 +51,8 @@ func check(t *testing.T, files []string) {
 	defer output.Close()
 
 	var lines []string
+
+	//fmt.Printf("files number: %d\n", len(files))
 	for _, f := range files {
 		input, err := os.Open(f)
 		if err != nil {
@@ -64,13 +66,14 @@ func check(t *testing.T, files []string) {
 	}
 
 	sort.Strings(lines)
-
+	//fmt.Printf("(lines) the first is %s\t last is %s\n", lines[0], lines[len(lines) - 1]);
 	outputScanner := bufio.NewScanner(output)
 	i := 0
 	for outputScanner.Scan() {
 		var v1 int
 		var v2 int
 		text := outputScanner.Text()
+		//fmt.Printf("the text is %s\n", text)
 		n, err := fmt.Sscanf(lines[i], "%d", &v1)
 		if n == 1 && err == nil {
 			n, err = fmt.Sscanf(text, "%d", &v2)
@@ -110,9 +113,12 @@ func makeInputs(num int) []string {
 			fmt.Fprintf(w, "%d\n", i)
 			i++
 		}
+		//fmt.Println("the i is %d in makeInputs", i - 1)
 		w.Flush()
 		file.Close()
 	}
+
+
 	return names
 }
 
@@ -149,6 +155,7 @@ func TestSequentialSingle(t *testing.T) {
 	check(t, mr.files)
 	checkWorker(t, mr.stats)
 	cleanup(mr)
+	fmt.Println("TestSequentialSingle end")
 }
 
 func TestSequentialMany(t *testing.T) {
@@ -157,6 +164,7 @@ func TestSequentialMany(t *testing.T) {
 	check(t, mr.files)
 	checkWorker(t, mr.stats)
 	cleanup(mr)
+	//fmt.Println("TestSequentialMany end")
 }
 
 func TestBasic(t *testing.T) {

@@ -1,5 +1,16 @@
 package mapreduce
 
+import (
+	//"os"
+	//"encoding/json"
+	//"fmt"
+	//"log"
+	//"fmt"
+	"os"
+	"log"
+	"encoding/json"
+)
+
 // doReduce does the job of a reduce worker: it reads the intermediate
 // key/value pairs (produced by the map phase) for this task, sorts the
 // intermediate key/value pairs by key, calls the user-defined reduce function
@@ -31,4 +42,55 @@ func doReduce(
 	// 	enc.Encode(KeyValue{key, reduceF(...)})
 	// }
 	// file.Close()
+
+
+	var help = make(map[string][]string)
+	//fmt.Println("===========================")
+	//fmt.Println(reduceTaskNumber)
+	for i := 0; i < nMap; i++ {
+		intmediateFileName := reduceName(jobName, i, reduceTaskNumber)
+		fp, err := os.Open(intmediateFileName)
+		if err != nil {
+			log.Fatal("ewrw", err)
+			continue
+		}
+		//else {
+		//	fmt.Println("open the file successfully")
+		//}
+		defer fp.Close()
+
+		dec := json.NewDecoder(fp)
+		for {
+			var v KeyValue
+			err := dec.Decode(&v)
+			if err != nil {
+				break
+			}
+			//fmt.Println("the key is in reduce %s", v.Key)
+			help[v.Key] = append(help[v.Key], v.Value)
+		}
+		//fmt.Printf("the index i is %d\n", i)
+	}
+
+
+
+	outFileName := mergeName(jobName, reduceTaskNumber)
+	//fmt.Printf("the reduce fileName is %s\n", outFileName)
+	file, _ := os.OpenFile(outFileName, os.O_CREATE|os.O_WRONLY, 0666)
+	defer file.Close()
+
+	enc := json.NewEncoder(file)
+
+	//var testString string
+	//fmt.Println(len(help))
+	for k, v := range help {
+		//enc := json.NewEncoder(file)
+		//err := enc.Encode(&kv)
+		enc.Encode(KeyValue{k, reduceF(k, v)})
+		//testString = k
+		//fmt.Printf("enter in range map\n");
+		//fmt.Println(k)
+	}
+	//fmt.Printf("the final string in reduce is %s\n", testString)
+
 }
