@@ -48,6 +48,8 @@ type RegisterArgs struct {
 // please use call() to send all RPCs, in master.go, mapreduce.go,
 // and worker.go.  please don't change this function.
 //
+//这个函数就是go下rpc包远程调用函数的封装
+//具体的你可以直接看golang的文档
 func call(srv string, rpcname string,
 	args interface{}, reply interface{}) bool {
 	c, errx := rpc.Dial("unix", srv)

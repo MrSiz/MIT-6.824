@@ -46,19 +46,20 @@ func doMap(
 	//
 	// Remember to close the file after you have written all the values!
 
-	//get the inFile content
+	//读取内容到byte[]中
 	datArr, err := ioutil.ReadFile(inFile)
 
 	if err != nil {
 		fmt.Printf("error to read file\n")
 		return 
 	}
+	//转换成mapF所需要的类型
 	var datString = string(datArr)
 
-
+	//调用mapF得到的是一个keyValue类型的切片
 	keyValueData := mapF(inFile, datString)
 
-	
+	//这两个map分别是用来判断对应的文件名是否有相应的*os.File和*json.Encoder
 	var flag  = make(map[string]*os.File)
 	var encFlag = make(map[string]*json.Encoder)
 	//var testString string
@@ -67,10 +68,13 @@ func doMap(
 
 	var enc *json.Encoder
 	for _, kv := range keyValueData {
-		//fmt.Printf("%d\t%d\n", mapTaskNumber, (int(ihash(kv.Key)) % nReduce + nReduce) % nReduce)
+
+		//相同键值的KeyValue将会放到同一个中间文件中
 		outName := reduceName(jobName, mapTaskNumber, (int(ihash(kv.Key)) % nReduce + nReduce) % nReduce)
 		//fmt.Printf("the file Name is %s\n", outName)
 		var file *os.File
+
+		//下面的代码是把KeyValue以Json的方式写入到文件中
 		if _, ok := flag[outName]; !ok {
 			file, err = os.OpenFile(outName, os.O_CREATE|os.O_WRONLY, 0666)
 			if err != nil {
@@ -79,30 +83,23 @@ func doMap(
 			}
 			defer file.Close()
 			enc = json.NewEncoder(file)
-			//fmt.Printf("the outName is %s enc is %v\n", outName, enc)
 			flag[outName] = file
-			//fmt.Printf("hhh the file Name is %s\n", outName)
 			encFlag[outName] = enc
 		}else {
 			file = flag[outName]
 			enc = encFlag[outName]
 		}
-		//fmt.Printf("Key %s : Value %s enc is %v\n", kv.Key, kv.Value, enc)
-		//if (kv.Key == "99998") {
-		//	//fmt.Printf("the initial enc is %v\n", enc)
-		//	break
-		//}
+
     	err := enc.Encode(&kv)
 
     	if err != nil {
         	log.Println("Error in encoding json")
     	}
-    	//testString = kv.Key
 	}
 
-	//fmt.Printf("the final key is %s\n", testString)
 }
 
+//根据字符串产生相应的哈希值
 func ihash(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))

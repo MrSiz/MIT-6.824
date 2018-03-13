@@ -43,22 +43,21 @@ func doReduce(
 	// }
 	// file.Close()
 
-
+	//一个string对应一个[]string切片的map
 	var help = make(map[string][]string)
-	//fmt.Println("===========================")
-	//fmt.Println(reduceTaskNumber)
+
+	//nMap是最开始输入的文件数
 	for i := 0; i < nMap; i++ {
+		//处理reduceTaskNumber所对应的所有map操作产生的中间文件
 		intmediateFileName := reduceName(jobName, i, reduceTaskNumber)
 		fp, err := os.Open(intmediateFileName)
 		if err != nil {
 			log.Fatal("ewrw", err)
 			continue
 		}
-		//else {
-		//	fmt.Println("open the file successfully")
-		//}
-		defer fp.Close()
 
+		defer fp.Close()
+		//解析json格式的文件，然后把相同的Value存到同一个Key下
 		dec := json.NewDecoder(fp)
 		for {
 			var v KeyValue
@@ -69,28 +68,20 @@ func doReduce(
 			//fmt.Println("the key is in reduce %s", v.Key)
 			help[v.Key] = append(help[v.Key], v.Value)
 		}
-		//fmt.Printf("the index i is %d\n", i)
 	}
 
 
-
+	//reduce操作的输出文件
 	outFileName := mergeName(jobName, reduceTaskNumber)
-	//fmt.Printf("the reduce fileName is %s\n", outFileName)
 	file, _ := os.OpenFile(outFileName, os.O_CREATE|os.O_WRONLY, 0666)
 	defer file.Close()
 
 	enc := json.NewEncoder(file)
 
-	//var testString string
-	//fmt.Println(len(help))
+	//下面进行的是reduce操作
 	for k, v := range help {
-		//enc := json.NewEncoder(file)
-		//err := enc.Encode(&kv)
+		//把同一个Key下的所有Value拿去用
 		enc.Encode(KeyValue{k, reduceF(k, v)})
-		//testString = k
-		//fmt.Printf("enter in range map\n");
-		//fmt.Println(k)
 	}
-	//fmt.Printf("the final string in reduce is %s\n", testString)
 
 }

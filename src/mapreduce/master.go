@@ -12,9 +12,9 @@ import (
 type Master struct {
 	sync.Mutex
 
-	address         string
-	registerChannel chan string
-	doneChannel     chan bool
+	address         string //Master的地址，rpc时用的
+	registerChannel chan string //这个就是用来存储worker地址的
+	doneChannel     chan bool //这个就是用来等到完成的
 	workers         []string // protected by the mutex
 
 	// Per-task information
@@ -111,7 +111,7 @@ func (mr *Master) run(jobName string, files []string, nreduce int,
 	mr.nReduce = nreduce
 
 	fmt.Printf("%s: Starting Map/Reduce task %s\n", mr.address, mr.jobName)
-
+	//MapReduce的核心工作就下面这几个完成的
 	schedule(mapPhase)
 	schedule(reducePhase)
 	finish()
