@@ -31,6 +31,9 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 	case mapPhase:
 		doMap(arg.JobName, arg.TaskNumber, arg.File, arg.NumOtherPhase, wk.Map)
 	case reducePhase:
+		//if arg.TaskNumber >= 50 {
+		//	break
+		//}
 		doReduce(arg.JobName, arg.TaskNumber, arg.NumOtherPhase, wk.Reduce)
 	}
 

@@ -13,18 +13,10 @@ func ihash(s string) uint32 {
 }
 
 func main() {
-	help := make(map[string][]string)
-	help["1"] = append(help["1"], "a")
-	help["1"] = append(help["1"], "b")
-
-	for k, v := range help {
-		fmt.Println(k, v)
-	}
-	for k := range help {
-		fmt.Println(k)
-	}
-
-	fmt.Println(ihash("he"))
-	fmt.Println(ihash("he"))
-	//log.
+	t := make(chan int)
+	go func() {
+		t <- 1
+	}()
+	a := <- t
+	fmt.Println(a)
 }

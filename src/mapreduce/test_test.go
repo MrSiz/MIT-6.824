@@ -169,7 +169,7 @@ func TestSequentialMany(t *testing.T) {
 
 func TestBasic(t *testing.T) {
 	mr := setup()
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 1; i++ {
 		go RunWorker(mr.address, port("worker"+strconv.Itoa(i)),
 			MapFunc, ReduceFunc, -1)
 	}
