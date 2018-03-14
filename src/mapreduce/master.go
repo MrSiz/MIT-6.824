@@ -140,10 +140,13 @@ func (mr *Master) killWorkers() []int {
 		var reply ShutdownReply
 		ok := call(w, "Worker.Shutdown", new(struct{}), &reply)
 		if ok == false {
+		//	fmt.Println("there is a problem?")
 			fmt.Printf("Master: RPC %s shutdown error\n", w)
 		} else {
 			ntasks = append(ntasks, reply.Ntasks)
 		}
 	}
+
+	//在Failure测试中,关闭worker失败，是因为RunWorker中,有的worker直接关闭了监听
 	return ntasks
 }

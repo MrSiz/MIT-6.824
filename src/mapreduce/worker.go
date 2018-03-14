@@ -106,6 +106,7 @@ func RunWorker(MasterAddress string, me string,
 		} else {
 			break
 		}
+		//fmt.Printf("the value of nRPC %d\n", wk.nRPC)
 	}
 	wk.l.Close()
 	debug("RunWorker %s exit\n", me)

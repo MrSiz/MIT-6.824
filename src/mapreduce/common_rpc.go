@@ -54,6 +54,7 @@ func call(srv string, rpcname string,
 	args interface{}, reply interface{}) bool {
 	c, errx := rpc.Dial("unix", srv)
 	if errx != nil {
+		//fmt.Println("Dial error")
 		return false
 	}
 	defer c.Close()
@@ -63,7 +64,6 @@ func call(srv string, rpcname string,
 	if err == nil {
 		return true
 	}
-
 	fmt.Println(err)
 	return false
 }

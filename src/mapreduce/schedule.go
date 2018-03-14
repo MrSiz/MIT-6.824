@@ -5,8 +5,9 @@ import (
 	//"sync"
 	//"log"
 	//"sync"
-	"sync"
+	//"sync"
 	//"unicode"
+	"sync"
 )
 
 
@@ -44,8 +45,8 @@ func (mr *Master) schedule(phase jobPhase) {
 
 	//大致流程就是worker领任务，完成任务后，继续领任务
 
-	/*以下代码是单个worker能够顺利工作的
-	task := new(DoTaskArgs)
+	//以下代码是单个worker能够顺利工作的
+	/*task := new(DoTaskArgs)
 	task.JobName = mr.jobName
 	task.Phase = phase
 	task.NumOtherPhase = nios
@@ -76,7 +77,7 @@ func (mr *Master) schedule(phase jobPhase) {
 	//多个worker同时工作，那最主要的问题就是解决同步问题了
 	//参考https://studygolang.com/articles/2027
 
-	//使用等待队列来等待所有的worker完成工作
+	////使用等待队列来等待所有的worker完成工作
 	var waitgroup sync.WaitGroup
 
 	for i := 0; i < ntasks; i++ {
@@ -111,15 +112,28 @@ func (mr *Master) schedule(phase jobPhase) {
 				//一个任务完成，waitgroup就减去1
 				waitgroup.Done()
 				//把worker重新放进channel中
-				go func() {
-					mr.registerChannel <- worker
-				}()
+				mr.registerChannel <- worker
 			}else {
-				fmt.Println("erorr")
+				//看给的测试例子
+				//出现错误的原因是存在worker只能执行nRPC次的调用(nRPC>0, 当nRPC < 0 时可以一直调用, 参见RunWorker源码)
+				//但是出错的worker已经接受了任务,所以我们只需要找其他的worker完成该任务即可
+
+
+				for ok == false {
+					anotherWorker := <- mr.registerChannel
+					ok = call(anotherWorker, "Worker.DoTask", task, reply)
+					//完成任务的时候就把worker又放回到registerChannel中
+					if ok == true {
+						mr.registerChannel <- anotherWorker
+					}
+				}
+				waitgroup.Done()
+
 			}
 			//注意是用传的waitgroup的地址，相当c++的引用，为了保持修改对象是一致的，而不是拷贝
 		}(phase, &waitgroup)
 	}
+	fmt.Println("I am here")
 	//阻塞等待所有的任务完成
 	waitgroup.Wait()
 
